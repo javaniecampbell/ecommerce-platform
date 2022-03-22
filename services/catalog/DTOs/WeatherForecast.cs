@@ -1,6 +1,6 @@
 using System;
 
-namespace catalog
+namespace Catalog.DTOs
 {
     public class WeatherForecast
     {

@@ -1,11 +1,64 @@
 version: "3.8"
 
 services:
-  catalog:
-    build:
-      context: ../services/catalog
-      dockerfile: Dockerfile
+  # catalog:
+  #   build:
+  #     context: ../services/catalog
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 4000:80
+  #   environment:
+  #     - Name=${Name}
+
+  database:
+    image: mcr.microsoft.com/mssql/server
     ports:
-      - 4000:80
+      - 1433:1433
     environment:
-      - Name=${Name}
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=P@ssw0rd1
+    volumes:
+      - ../.infrastructure/data:/scripts/
+    command:
+      - /bin/bash
+      - -c
+      - |
+        # Launch MSSQL and send to background
+        /opt/mssql/bin/sqlservr &
+        pid=$$!
+        # Wait for it to be available
+        echo "Waiting for MS SQL to be available ⏳"
+        /opt/mssql-tools/bin/sqlcmd -l 30 -S database -h-1 -V1 -U sa -P $$SA_PASSWORD -Q "SET NOCOUNT ON SELECT \"YAY WE ARE UP\" , @@servername"
+        is_up=$$?
+        while [ $$is_up -ne 0 ] ; do 
+          echo -e $$(date) 
+          /opt/mssql-tools/bin/sqlcmd -l 30 -S database -h-1 -V1 -U sa -P $$SA_PASSWORD -Q "SET NOCOUNT ON SELECT \"YAY WE ARE UP\" , @@servername"
+          is_up=$$?
+          sleep 5 
+        done
+        # Run every script in /scripts
+        # TODO set a flag so that this is only done once on creation, 
+        #      and not every time the container runs
+        for foo in /scripts/*.sql
+          do /opt/mssql-tools/bin/sqlcmd -U sa -P $$SA_PASSWORD -l 30 -e -i $$foo
+        done
+        # trap SIGTERM and send same to sqlservr process for clean shutdown
+        trap "kill -15 $$pid" SIGTERM
+        # Wait on the sqlserver process
+        wait $$pid
+        exit 0
+  flyway:
+    container_name: flyway-migrations
+    # container_name: flyway
+    image: flyway/flyway:latest
+    command: -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    environment:
+      FLYWAY_USER: ${DATABASE_USER}
+      FLYWAY_PASSWORD: ${DATABASE_PASSWORD}
+      # FLYWAY_GROUP: 'true'
+      FLYWAY_URL: ${DATABASE_CONNECTION}
+    volumes:
+      - ../.infrastructure/migrations:/flyway/sql
+      # - ../.data:/flyway/sql
+    depends_on:
+      - database

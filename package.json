@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:catalog": "dotnet run --project ./services/catalog/catalog.csproj"
+    "start:catalog": "dotnet run --project ./services/catalog/catalog.csproj",
+    "start": "docker-compose -f ./.docker/docker-compose.yml up -d",
+    "stop": "docker-compose -f ./.docker/docker-compose.yml down"
   },
   "keywords": [],
   "author": "",

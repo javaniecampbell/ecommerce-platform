@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>7.1</LangVersion>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\.infrastructure\configurations</DockerfileContext>
+    <DockerfileContext>..\..\services\catalog</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>

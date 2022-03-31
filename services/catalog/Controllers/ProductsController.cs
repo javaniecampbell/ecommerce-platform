@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Catalog.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Catalog.Data;
 
 namespace Catalog.Controllers
 {
@@ -12,6 +15,7 @@ namespace Catalog.Controllers
     [Route("[controller]")]
     public class ProductsController : ControllerBase
     {
+        private readonly CatalogDbContext _db;
         private static Category category = new Category { Name = "Phones", Id = 1, Description = "Calling devices" };
         private static readonly Product[] Products = new Product[]
         {
@@ -22,24 +26,42 @@ namespace Catalog.Controllers
 
         private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(ILogger<ProductsController> logger)
+        public ProductsController(ILogger<ProductsController> logger, CatalogDbContext dbContext)
         {
             _logger = logger;
+            _db = dbContext;
         }
 
         [HttpGet]
         public IEnumerable<Product> Get()
         {
-            var rng = new Random();
+            return _db.Products.ToList();
+        }
 
-            // return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            // {
-            //     Date = DateTime.Now.AddDays(index),
-            //     TemperatureC = rng.Next(-20, 55),
-            //     Summary = Products[rng.Next(Products.Length)]
-            // })
-            // .ToArray();
-            return Products;
+        [HttpPost]
+        public async Task<IActionResult> Post(Product product)
+        {
+
+            try
+            {
+                Category category = product.Category;
+              _db.Categories.Add(category);
+              
+              product.CategoryId = category.Id;
+               
+               
+               _db.Products.Add(product);
+
+                await _db.SaveChangesAsync();
+                return Ok(product);
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e?.Message ?? e?.InnerException?.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace catalog.Data
+namespace Catalog.Data
 {
     public class CatalogDbContext : DbContext
     {

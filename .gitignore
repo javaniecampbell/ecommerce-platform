@@ -798,10 +798,9 @@ FodyWeavers.xsd
 # Support for Project snippet scope
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode
-services/catalog/obj/project.nuget.cache
-.gitignore
-services/catalog/obj/catalog.csproj.nuget.dgspec.json
-services/catalog/obj/catalog.csproj.nuget.g.props
-services/catalog/obj/catalog.csproj.nuget.g.targets
-services/catalog/obj/project.assets.json
-services/catalog/obj/project.nuget.cache
+/services/catalog/bin/**
+/services/catalog/obj/**
+/services/Cart.Domain/bin/**
+/services/Cart.Domain/obj/**
+/services/Cart.Tests/bin/**
+/services/Cart.Tests/obj/**

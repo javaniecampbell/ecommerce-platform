@@ -40,7 +40,7 @@ namespace CartService.Tests
 
 
             // Assert
-            Assert.IsTrue(sut.Quantity == 2);
+            Assert.IsTrue(sut.ItemsCount == 2);
 
             // Start with writing test with the current
         }
@@ -64,9 +64,26 @@ namespace CartService.Tests
 
 
             // Assert
-            Assert.IsTrue(sut.Quantity == 1);
+            Assert.IsTrue(sut.ItemsCount == 1);
 
             // Start with writing test with the current
         }
+        [TestMethod]
+        public void When_TheSame_Item_Is_Add_It_Should_Increase_The_Quantity_By_The_ItemBeingAdded_Quantity()
+        {
+            // Arrange
+            Cart sut = new Cart();
+            Guid id = Guid.NewGuid();
+            // Act 
+            sut.AddProduct(new Product { Id = id, Name = "", Description = "", UnitPrice = 50d, Quantity = 3 });
+            sut.AddProduct(new Product { Id = id, Name = "", Description = "", UnitPrice = 50d, Quantity = 1 });
+
+            // ItemCount does not increase if is the same item - unique items in cart
+            // CartQuantity or TotalItemInCart increases - this all the quantities of each item reduced to a single value total
+            // Assert
+            Assert.IsTrue(sut.ItemsCount == 1);
+            Assert.IsTrue(sut.CartQuantity == 4);
+        }
+
     }
 }
